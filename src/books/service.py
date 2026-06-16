@@ -58,7 +58,7 @@ class BookService:
 
             await session.commit()
 
-            # return None
+            return {}
 
         else:
             return None
