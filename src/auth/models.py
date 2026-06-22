@@ -14,8 +14,8 @@ class User(SQLModel, table=True):
     )
 
     username : str
-    password : str
     email : str
+    password_hash : str = Field(exclude=True)
     first_name : str
     last_name : str
     is_verified : bool = False
