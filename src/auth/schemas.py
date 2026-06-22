@@ -4,8 +4,8 @@ from pydantic import BaseModel, Field
 
 class UserCreateModel(BaseModel):
     username : str = Field(max_length=20)
-    email : str = Field(min_length=8)
-    password : str
+    email : str
+    password : str = Field(min_length=8)
     first_name : str = Field(max_length=25)
     last_name : str = Field(max_length=25)
 
@@ -19,3 +19,7 @@ class UserModel(BaseModel):
     is_verified : bool
     created_at: datetime
     updated_at: datetime
+
+class UserLoginModel(BaseModel):
+    email : str
+    password : str = Field(min_length=8)
