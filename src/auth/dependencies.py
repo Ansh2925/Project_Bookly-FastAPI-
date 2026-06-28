@@ -4,7 +4,7 @@ from .utils import decode_token
 from fastapi.exceptions import HTTPException
 
 
-class AccessTokenBearer(HTTPBearer):
+class TokenBearer(HTTPBearer):
 
     def __init__(self, auto_error =True):
         super().__init__(auto_error=auto_error)
@@ -14,20 +14,16 @@ class AccessTokenBearer(HTTPBearer):
         token = creds.credentials
         token_data = decode_token(token)
 
-        if not self.token_valid:
+        if not self.token_valid(token):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid/expired token")
 
-        if token_data is None:
-            raise HTTPException(
-                status_code=401,
-                detail="Invalid or expired token"
-            )
+        # if token_data is None:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_401_UNAUTHORIZED,
+        #         detail="Invalid or expired token"
+        #     )
 
-        if token_data.get("refresh"):
-            raise HTTPException(
-                status_code=401,
-                detail="Access token required"
-            )
+        self.verify_token_data(token_data)
 
         return token_data
 
@@ -36,3 +32,25 @@ class AccessTokenBearer(HTTPBearer):
         token_data = decode_token(token)
 
         return True if token_data is not None else False
+
+    def verify_token_data(self, token_data):
+        raise NotImplementedError("Please override this method in child classes.")
+
+
+class AccessTokenBearer(TokenBearer):
+
+    def verify_token_data(self, token_data : dict) -> None:
+        if token_data.get("refresh"):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access token required"
+            )
+
+class RefreshTokenBearer(TokenBearer):
+
+    def verify_token_data(self, token_data : dict) -> None:
+        if not token_data.get("refresh"):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token required"
+            )
